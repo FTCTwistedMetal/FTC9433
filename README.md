@@ -6,6 +6,10 @@ Uploaded code onto GitHub for efficiency and cleanness...
 If you've stumbled upon this, feel free to browse and hopefully find some inspiration, but
 please do not copy and paste anything. You won't learn and it's poor sportsmanship!
 <br>
+If you're unfamiliar with GitHub, you can check codes' progress by clicking on the code you wish to see,
+then click "history," and click any version you want to look at. Green highlights are additions, red are
+deleted, and no highlights are the same. You can click "view" if you want to see just the code version
+without all the confusing highlight stuff.
 
 #Autonomous
 I've tried recording the stages of autonomous, and now it's on Git, the history is saved! Hurray!
