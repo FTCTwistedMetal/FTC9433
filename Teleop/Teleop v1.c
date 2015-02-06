@@ -1,17 +1,19 @@
-#pragma config(Hubs,  S1, HTMotor,  HTMotor,  HTMotor,  none)
-#pragma config(Hubs,  S2, HTServo,  HTMotor,  none,     none)
-#pragma config(Sensor, S3,     irSeeker,       sensorPotentiometer) Wheres "HiTechnic1200 ir seeker"?
+#pragma config(Hubs,  S1, HTMotor,  HTMotor,  HTMotor,  HTMotor)
+#pragma config(Hubs,  S2, HTServo,  none,     none,     none)
+#pragma config(Sensor, S1,     ,               sensorI2CMuxController)
+#pragma config(Sensor, S2,     ,               sensorI2CMuxController)
+#pragma config(Sensor, S3,     irSeeker,       sensorPotentiometer)
 #pragma config(Sensor, S4,     touch,          sensorTouch)
-#pragma config(Motor,  mtr_S1_C1_1,     frontLeft,     tmotorNormal, openLoop)
-#pragma config(Motor,  mtr_S1_C1_2,     frontRight,    tmotorNormal, openLoop)
-#pragma config(Motor,  mtr_S1_C2_1,     backLeft,      tmotorNormal, openLoop)
-#pragma config(Motor,  mtr_S1_C2_2,     backRight,     tmotorNormal, openLoop)
-#pragma config(Motor,  mtr_S1_C3_1,     liftLeftTop,   tmotorNormal, openLoop)
-#pragma config(Motor,  mtr_S1_C3_2,     liftLeftBottom, tmotorNormal, openLoop)
-#pragma config(Motor,  mtr_S2_C2_1,     liftRightTop,  tmotorNormal, openLoop)
-#pragma config(Motor,  mtr_S2_C2_2,     liftRightBottom, tmotorNormal, openLoop)
-#pragma config(Servo,  srvo_S2_C1_1,    latchLeft,            tServoStandard)
-#pragma config(Servo,  srvo_S2_C1_2,    latchRight,           tServoStandard)
+#pragma config(Motor,  mtr_S1_C1_1,     liftLeftBottom, tmotorTetrix, openLoop, reversed)
+#pragma config(Motor,  mtr_S1_C1_2,     liftLeftTop,   tmotorTetrix, openLoop)
+#pragma config(Motor,  mtr_S1_C2_1,     frontLeft,     tmotorTetrix, openLoop, reversed)
+#pragma config(Motor,  mtr_S1_C2_2,     backLeft,      tmotorTetrix, openLoop, reversed)
+#pragma config(Motor,  mtr_S1_C3_1,     frontRight,    tmotorTetrix, openLoop)
+#pragma config(Motor,  mtr_S1_C3_2,     backRight,     tmotorTetrix, openLoop)
+#pragma config(Motor,  mtr_S1_C4_1,     liftRightTop,  tmotorTetrix, openLoop, reversed)
+#pragma config(Motor,  mtr_S1_C4_2,     liftRightBottom, tmotorTetrix, openLoop)
+#pragma config(Servo,  srvo_S2_C1_1,    latchRight,           tServoStandard)
+#pragma config(Servo,  srvo_S2_C1_2,    latchLeft,            tServoStandard)
 #pragma config(Servo,  srvo_S2_C1_3,    intakeLeft,           tServoContinuousRotation)
 #pragma config(Servo,  srvo_S2_C1_4,    intakeRight,          tServoContinuousRotation)
 #pragma config(Servo,  srvo_S2_C1_5,    servo5,               tServoNone)
@@ -20,9 +22,19 @@
  
 /* December 19th, 2014 (Friday no-school!)
 Just added lift and the joystick-if-statement
+ 
+Janurary 5th, 2014
+Changed driver thing to (maybe) be better. I think it's just more aesthetically pleasing
+ 
+Janurary 6th, 2014
+They finally got the robot (kind of) done (not really)! Added buttons for the servos that latch onto the rolling goal,
+and we were able to go backards onto the ramp! Hurray~
+Oh... and I realized I didn't do progress 2, 3, 4.... idk how many... so this will just be progress 2!
 */
  
 #include "JoystickDriver.c"
+#define BOUND(input, min, max) input > max ? max : (input < min ? min : input)
+//Bound: takes the input and either returns max (if input is greater than max), min (if input is less than min), or input (if it fits in the range)
  
 int threshold=10;
 int joyy1;
@@ -31,70 +43,82 @@ int mode = 1;
  
 task main()
 {
- 
-  while(true)
-  {
-    getJoystickSettings(joystick);
- 
-    //Checking this first can save a little memory I guess
-    if(abs(joystick.joy1_y1) > threshold || abs(joystick.joy1_x2) > threshold)
+    StopTask(displayDiagnostics);
+    while(true)
     {
-      //joyy1 is either 100||-100 (if the joystick is past the limit (100)), 0 (if the joystick is under the threshold),
-      //or the value of the joystick
-    joyy1 = abs(joystick.joy1_y1) > 100 ? 100 * sgn(joystick.joy1_y1) : (abs(joystick.joy1_y1) < threshold ? 0 : joystick.joy1_y1);
-    joyx2 = abs(joystick.joy1_x2) > 100 ? 100  * sgn(joystick.joy1_x2): (abs(joystick.joy1_x2) < threshold ? 0 : joystick.joy1_x2);
+        getJoystickSettings(joystick);
  
-      motor[frontLeft] = (joyy1 + joyx2) / mode;
-      motor[frontRight] = (joyy1 - joyx2) / mode;
-      motor[backLeft] = (joyy1 + joyx2) / mode;
-      motor[backRight] = (joyy1 - joyx2) / mode;
-    }
+        if(abs(joystick.joy1_y1) > threshold)
+        {
+            joyy1 = BOUND(joystick.joy1_y1, -100, 100);
+            //joyy1 = joystick.joy1_y1; //We probably don't have to limit the joystick value because we're limiting it when we set the motors
+            } else {
+            joyy1 = 0;
+        }
+        if(abs(joystick.joy1_x2) > threshold)
+        {
+            joyx2 = BOUND(joystick.joy1_x2, -100, 100);
+            //joyx2 = joystick.joy1_x2;
+            } else {
+            joyx2 = 0;
+        }
  
-    if(joy1Btn(4)==1)
-    {
-      if(mode==1)
-      {
-        mode = 4;
-        } else {
-        mode = 1;
-      }
-      wait1Msec(250);
-    }
+        motor[frontLeft] = BOUND(joyy1 + joyx2, -100, 100);
+        motor[frontRight] = BOUND(joyy1 - joyx2, -100, 100);
+        motor[backLeft] = BOUND(joyy1 + joyx2, -100, 100);
+        motor[backRight] = BOUND(joyy1 - joyx2, -100, 100);
  
-    if(joy1Btn(6)==1)
-    {
-      motor[liftLeftTop] = 100 / mode;
-      motor[liftLeftBottom] = 100 / mode;
-      motor[liftRightTop] = 100 / mode;
-      motor[liftRightBottom] = 100 / mode;
-      } else if(joy1Btn(5)==1) {
-      motor[liftLeftTop] = -100 / mode;
-      motor[liftLeftBottom] = -100 / mode;
-      motor[liftRightTop] = -100 / mode;
-      motor[liftRightBottom] = -100 / mode;
-      } else {
-      motor[liftLeftTop] = 0;
-      motor[liftLeftBottom] = 0;
-      motor[liftRightTop] = 0;
-      motor[liftRightBottom] = 0;
-    }
+        if(joy1Btn(4)==1)
+        {
+            if(mode==1)
+            {
+                mode = 4;
+                } else {
+                mode = 1;
+            }
+            wait1Msec(250);
+        }
  
-    if(joy1Btn(7)==1)
-    {
-      servo[latchLeft] = 180;
-      servo[latchRight] = 180;
-      } else if(joy1Btn(8)==1) {
-      servo[latchLeft] = 0;
-      servo[latchRight] = 0;
+        if(joy1Btn(6)==1)
+        {
+            motor[liftLeftTop] = 35 / mode;
+            motor[liftLeftBottom] = 35 / mode;
+            motor[liftRightTop] = 50 / mode;
+            motor[liftRightBottom] = 50 / mode;
+            } else if(joy1Btn(8)==1) {
+            motor[liftLeftTop] = -35 / mode;
+            motor[liftLeftBottom] = -35 / mode;
+            motor[liftRightTop] = -50 / mode;
+            motor[liftRightBottom] = -50 / mode;
+            } else {
+            motor[liftLeftTop] = 0;
+            motor[liftLeftBottom] = 0;
+            motor[liftRightTop] = 0;
+            motor[liftRightBottom] = 0;
+        }
+        if(joy1Btn(4)==1)
+        {
+            servo[intakeLeft] = 200;
+            servo[intakeRight] = 200;
+            } else {
+            servo[intakeLeft] = 50;
+            servo[intakeRight] = 50;
+        }
+        if(joy1Btn(5)==1)
+        {
+            servo[latchRight] = servo[latchRight] - 10;
+            servo[latchLeft] = servo[latchLeft] + 10;
+            nxtDisplayString(1, "RServo: %2d", servo[latchRight]);
+            nxtDisplayString(2, "LServo: %2d", servo[latchLeft]);
+            wait1Msec(25);
+        }
+        if(joy1Btn(7)==1)
+        {
+            servo[latchRight] = servo[latchRight] + 10;
+            servo[latchLeft] = servo[latchLeft] - 10;
+            nxtDisplayString(1, "RServo: %2d", servo[latchRight]);
+            nxtDisplayString(2, "LServo: %2d", servo[latchLeft]);
+            wait1Msec(25);
+        }
     }
- 
-    if(joy1Btn(4)==1)
-    {
-      servo[intakeLeft] = 200;
-      servo[intakeRight] = 200;
-      } else {
-      servo[intakeLeft] = 50;
-      servo[intakeRight] = 50;
-    }
-  }
 }
