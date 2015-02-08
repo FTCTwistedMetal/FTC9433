@@ -10,6 +10,10 @@ If you're unfamiliar with GitHub, you can check codes' progress by clicking on t
 then click "history," and click any version you want to look at. Green highlights are additions, red are
 deleted, and no highlights are the same. You can click "view" if you want to see just the code version
 without all the confusing highlight stuff.
+<br><br>
+For team members! If you want to download any version of a file, just go to it (described above) and
+click "raw," then right click the page, and save as "blahblahblah.c" (NOT .txt file!). For the library
+files, save it as ".h"
 
 #Autonomous
 I've tried recording the stages of autonomous, and now it's on Git, the history is saved! Hurray!
