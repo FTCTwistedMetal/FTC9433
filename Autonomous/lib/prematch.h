@@ -153,3 +153,40 @@ int chooseDelays()
 	}
 	return (currentSelectionDelays - 1) * currentSelectionDelays;	//Return delay before starting (regarding the selected number)
 }
+
+bool isTestRun()
+{
+	string displayTestRun[] = {
+		"Test Run?",
+		" 1: No",
+		" 2: Yes"
+	};
+	bool currentSelection = false;
+	//Initialize the display and currentSelection inside the function so it doesn't take up space later
+
+	eraseDisplay();
+	for(int i=0; i < 6; i++)	//Clear screen, then display the "delays" screen
+	{
+		nxtDisplayString(i, "%s", displayTestRun[i]);
+	}
+
+	while(nNxtButtonPressed != 3)
+	{
+		if(nNxtButtonPressed == 1 && currentSelection == false)	//if right button, go down
+		{
+			currentSelectionDelays != currentSelection;
+			nxtDisplayString(1, " ");	//Erase the ">" in the last line
+			nxtDisplayString(2, ">");	//Add the ">" in the current line
+			wait1Msec(250);
+		}
+		else if(nNxtButtonPressed == 2 && currentSelection == true)	//if left button, go up
+		{
+			currentSelectionDelays--;
+			nxtDisplayString(2, " ");	//Erase the ">" in the last line
+			nxtDisplayString(1, ">");	//Add the ">" in the current line
+			wait1Msec(250);
+		}
+		wait1Msec(10);
+	}
+	return currentSelection;	//Return true/false depending on what's selected
+}
