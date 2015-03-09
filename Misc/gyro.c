@@ -2,7 +2,8 @@
 
 //Here's basically how I would use a gyro sensor for going straight
 /*NOTE: a gyro does NOT tell you what direction it is. It only tells you the angular velocity (Mrs. Sims didn't really
-teach us this), which is basically the rate at which it is turnning (E.g "30 degrees per second")*/
+teach us this), which is basically the rate at which it is turnning (E.g "30 degrees per second"). The Gyro measures
+in degrees per SECOND*/
 
 /*A structure is basically putting all these variables under 1 name. You'd use "name.turnRate" to use the turnRate.
 If you kind of get Object Oriented Programming, then understand that you can instantiate this structure (dw if you don't get it)*/
@@ -42,7 +43,8 @@ void calibrateGyro()
   gyro.offSet /= numSample; //Divide the sum by how many numbers to get the average (ends up usually around 598)
 }
 
-task gyroTask() //A task is basically a function, except it runs at the SAME TIME as "task main()"
+ //A task is basically a function, except it runs at the SAME TIME as "task main()"
+void updateGyro() //Changed to function because reasons
 {
   while(true)
   {
@@ -71,7 +73,25 @@ task main()
 {
 initGyro(S1); //Put what port you're using the gyro on in there (IE port 3 would be "S3")
 calibrateGyro();
-StartTask(gyroTask);  //Start keeping track of the direction
+//StartTask(gyroTask);  //Start keeping track of the direction
+
+/* Example
+while(true)
+{
+  updateGyro();
+  if(gyro.heading > 1)
+  {
+    motor[left] = 50;
+    motor[right] = 75;
+  } else if(gyro.heading < -1) {
+    motor[left] = 75;
+    motor[right] = 50;
+  } else {
+    motor[left] = 50;
+    motor[right] = 50;
+  }
+}
+*/
 
 /*
 TODO: PID using this gyro sensor thingy
